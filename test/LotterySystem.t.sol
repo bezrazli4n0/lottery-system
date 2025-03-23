@@ -14,8 +14,8 @@ contract LotterySystemTest is Test {
     address constant BASE_VRF_WRAPPER = address(0xb0407dbe851f8318bd31404A49e658143C982F23);
 
     function setUp() public {
-        string memory rpcUrl = vm.envString("BASE_RPC_URL");
-        uint256 blockNumber = vm.envUint("BASE_BLOCK_NUM");
+        string memory rpcUrl = "https://mainnet.base.org";
+        uint256 blockNumber = 27979710;
 
         baseFork = vm.createSelectFork(rpcUrl, blockNumber);
         lotterySystem = new LotterySystem(BASE_VRF_WRAPPER);
