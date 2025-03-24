@@ -28,6 +28,7 @@ contract LotterySystem is VRFV2PlusWrapperConsumerBase {
     event Created(uint256 id);
     event Bought(address buyer, uint256 amount, uint256 lotteryId);
     event Finished(address winner, uint256 amount, uint256 lotteryId);
+    event FinishedEmpty(uint256 lotteryId);
 
     constructor(address vrfWrapper) VRFV2PlusWrapperConsumerBase(vrfWrapper) {}
 
@@ -87,6 +88,18 @@ contract LotterySystem is VRFV2PlusWrapperConsumerBase {
 
         Lottery storage lottery = lotteryList[lotteryId];
         lottery.isFinished = true;
+
+        if (lottery.users.length == 0) {
+            emit FinishedEmpty(lotteryId);
+            return 0;
+        } else if (lottery.users.length == 1) {
+            address winner = lottery.users[0];
+            uint256 amount = lottery.totalAmount;
+
+            payable(winner).transfer(amount);
+            emit Finished(winner, amount, lotteryId);
+            return 0;
+        }
 
         bytes memory extraArgs = VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: true}));
         (uint256 requestId, uint256 requestPriceInNative) = requestRandomnessPayInNative(30000, 3, 1, extraArgs);
